@@ -1,0 +1,10 @@
+#define VTN_TEXTURED true
+#define VTN_UNTEXTURED false
+
+#define VTN_COLOR_BLACK 0, 0, 0
+#define VTN_COLOR_WHITE 255, 255, 255
+#define VTN_COLOR_RED   255, 0, 0
+#define VTN_COLOR_GREEN 0, 255, 0
+#define VTN_COLOR_BLUE  0, 0, 255
+#define VTN_COLOR_UWU   100, 100, 210
+#define VTN_COLOR_OWO   45, 248, 174
