@@ -87,3 +87,28 @@ struct vtnMESH {
 
     bool LoadFromObjectFile(std::string sFilename, bool Textured);
 };
+
+struct vtnMAT3X3 {
+    float v[3][3];
+
+    vtnMAT3X3(float a) {
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
+                this->v[y][x] = a;
+    }
+    
+    vtnMAT3X3() {
+    	*this = vtnMAT3X3(0);
+    }
+
+    vtnMAT3X3 operator*(vtnMAT3X3 m) {
+        vtnMAT3X3 ret{0};
+
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
+                for (int i = 0; i < 3; i++)
+                    ret.v[y][x] += v[y][i] * m.v[i][x];
+
+        return ret;
+    }       
+};
