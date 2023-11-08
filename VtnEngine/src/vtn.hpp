@@ -1,3 +1,5 @@
 #include "vtn_defines.hpp"
 #include "vtn_types.hpp"
 #include "vtn_window.hpp"
+#include "vtn_event.hpp"
+#include "vtn_renderer.hpp"

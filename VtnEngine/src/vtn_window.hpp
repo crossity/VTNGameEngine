@@ -5,8 +5,8 @@
 
 #include "vtn_types.hpp"
 
-extern SDL_Window *VtnWindow;
-extern SDL_Renderer *VtnRenderer;
+extern SDL_Window *vtn_window;
+extern SDL_Renderer *vtn_renderer;
 
-void vtnInit(std::string Name, uint16 Width, uint16 Height);
+void vtnInitWindow(std::string Name, uint16 Width, uint16 Height);
 void vtnQuit();
