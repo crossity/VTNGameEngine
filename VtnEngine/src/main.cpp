@@ -3,28 +3,30 @@
 
 #include <SDL2/SDL.h>
 
-#define Height 800
-#define Width  1300
+#define Height 600
+#define Width  800
 
 using namespace std;
 
+void Keyboard(uint8 key) {
+    cout << key << endl;
+}
+
+void Display() {
+    SDL_SetRenderDrawColor(vtn_renderer, VTN_COLOR_UWU, 0);
+    SDL_RenderClear(vtn_renderer);
+}
+
 int main() {
-    vtnInit("hello", Width, Height);
+    vtnInitWindow("hello", Width, Height);
+    vtnInitRenderer();
+    vtnInitKeyboardFunc(Keyboard);
+    vtnInitDisplayFunc(Display);
 
     bool run = true;
 
     while (run) {
-        SDL_Event event;
-    
-        while(SDL_PollEvent(&event)){
-            switch(event.type) {
-                case SDL_QUIT:
-                    run = false;
-                    break;
-                default:
-                    break;
-            }
-        }
+        vtnUpdate(run);
     }
     vtnQuit();
     return 0;
