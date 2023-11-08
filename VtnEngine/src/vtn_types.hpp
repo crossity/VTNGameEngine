@@ -101,6 +101,36 @@ struct vtnMAT3X3 {
     	*this = vtnMAT3X3(0);
     }
 
+    vtnMAT3X3 operator+(vtnMAT3X3 m) {
+        vtnMAT3X3 ret{0};
+
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
+                    ret.v[y][x] += v[y][x] + m.v[y][x];
+
+        return ret;
+    }
+
+    vtnMAT3X3 operator-(vtnMAT3X3 m) {
+        vtnMAT3X3 ret{0};
+
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
+                    ret.v[y][x] += v[y][x] - m.v[y][x];
+
+        return ret;
+    }
+    
+    vtnMAT3X3 operator*(float a) {
+        vtnMAT3X3 ret{0};
+
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
+                ret.v[y][x] += v[y][x] * a;
+
+        return ret;
+    }
+
     vtnMAT3X3 operator*(vtnMAT3X3 m) {
         vtnMAT3X3 ret{0};
 
