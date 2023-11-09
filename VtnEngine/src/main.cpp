@@ -21,7 +21,6 @@ void Display() {
     SDL_SetRenderDrawColor(vtn_renderer, VTN_COLOR_RED, 0);
     for (int i = 0; i < m.t.size(); i++)
     {
-        cout << i << endl;
         vtnVEC2 p1 = vtnRender((*m.t[i].vert_buff).v[m.t[i].p[0]]);
         vtnVEC2 p2 = vtnRender((*m.t[i].vert_buff).v[m.t[i].p[1]]);
         vtnVEC2 p3 = vtnRender((*m.t[i].vert_buff).v[m.t[i].p[2]]);
