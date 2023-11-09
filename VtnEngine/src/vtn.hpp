@@ -3,3 +3,4 @@
 #include "vtn_window.hpp"
 #include "vtn_event.hpp"
 #include "vtn_renderer.hpp"
+#include "vtn_math.hpp"
