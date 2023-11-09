@@ -3,6 +3,7 @@
 #include <fstream>
 #include <strstream>
 #include <vector>
+#include <iostream>
 
 #include "vtn_types.hpp"
 
@@ -18,14 +19,13 @@ vtnVEC3 vtnVEC3::operator/(float a) {
     return vtnVEC3(this->x / a, this->y / a, this->z / a);
 }
 
-bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured = false)
+bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured)
 {
     std::ifstream f(sFilename);
     if (!f.is_open())
         return false;
 
     // Local cache of verts
-    std::vector<vtnVEC3> verts;
     std::vector<vtnVEC2> texts;
 
     std::string line;
@@ -47,7 +47,7 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured = false)
                 s >> junk;
                 for (int i = 0; i < 3; i++)
                     s >> pos[i];
-                verts.push_back(vtnVEC3(pos[0], pos[1], pos[2]));
+                this->vert_buffer.add(vtnVEC3(pos[0], pos[1], pos[2]));
             }
         }
         else if (line[0] == 'f') {
@@ -58,9 +58,10 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured = false)
                 for (int i = 0; i < 3; i++)
                     s >> face[i] >> junk >> uvs[i];
                 t.push_back(vtnTRI(
-                    vtnVEC3(verts[face[0] - 1]),
-                    vtnVEC3(verts[face[1] - 1]),
-                    vtnVEC3(verts[face[2] - 1]),
+                    &(this->vert_buffer),
+                    face[0] - 1,
+                    face[1] - 1,
+                    face[2] - 1,
                     vtnVEC3(255, 255, 255),
                     texts[uvs[0] - 1],
                     texts[uvs[1] - 1],
@@ -72,7 +73,7 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured = false)
                 int face[3];
                 for (int i = 0; i < 3; i++)
                     s >> face[i];
-                t.push_back(vtnTRI(verts[face[0] - 1], verts[face[1] - 1], verts[face[2] - 1], vtnVEC3(255, 255, 255)));
+                t.push_back(vtnTRI(&(this->vert_buffer), face[0] - 1, face[1] - 1, face[2] - 1));
             }
         }
     }
