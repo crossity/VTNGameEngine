@@ -36,4 +36,5 @@ vtnMAT3X3 vtnTranspose(vtnMAT3X3 &a) {
     for (int y = 0; y < 3; y++)
         for (int x = 0; x < 3; x++)
             b.v[y][x] = a.v[x][y];
+    return b;
 }
