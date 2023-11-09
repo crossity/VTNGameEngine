@@ -14,6 +14,61 @@ typedef unsigned int uint32;
 typedef long long int64;
 typedef unsigned long long uint64;
 
+struct vtnMAT4X4 {
+    float v[4][4];
+
+    vtnMAT4X4(float a) {
+        for (int y = 0; y < 4; y++)
+            for (int x = 0; x < 4; x++)
+                this->v[y][x] = a;
+    }
+    
+    vtnMAT4X4() {
+    	*this = vtnMAT4X4(0);
+    }
+
+    vtnMAT4X4 operator+(vtnMAT4X4 m) {
+        vtnMAT4X4 ret{0};
+
+        for (int y = 0; y < 4; y++)
+            for (int x = 0; x < 4; x++)
+                ret.v[y][x] += v[y][x] + m.v[y][x];
+
+        return ret;
+    }
+
+    vtnMAT4X4 operator-(vtnMAT4X4 m) {
+        vtnMAT4X4 ret{0};
+
+        for (int y = 0; y < 4; y++)
+            for (int x = 0; x < 4; x++)
+                ret.v[y][x] += v[y][x] - m.v[y][x];
+
+        return ret;
+    }
+
+    vtnMAT4X4 operator*(float a) {
+        vtnMAT4X4 ret{0};
+
+        for (int y = 0; y < 4; y++)
+            for (int x = 0; x < 4; x++)
+                ret.v[y][x] += v[y][x] * a;
+
+        return ret;
+    }
+
+    vtnMAT4X4 operator*(vtnMAT4X4 m) {
+        vtnMAT4X4 ret{0};
+
+        for (int y = 0; y < 4; y++)
+            for (int x = 0; x < 4; x++)
+                for (int i = 0; i < 4; i++)
+                    ret.v[y][x] += v[y][i] * m.v[i][x];
+
+        return ret;
+    }       
+};
+
 struct vtnVEC2 {
     float x, y;
 
@@ -62,6 +117,45 @@ struct vtnVEC3 {
         return vtnVEC3(this->x * a, this->y * a, this->z * a);
    }
     vtnVEC3 operator/(float a);
+};
+
+struct vtnVEC4 {
+    float x, y, z, w;
+
+    vtnVEC4() {
+        this->x = 0.f;
+        this->y = 0.f;
+        this->z = 0.f;
+        this->w = 0.f;
+    }
+    vtnVEC4(float x, float y, float z, float w) {
+        this->x = x;
+        this->y = y;
+        this->z = z;
+        this->w = w;
+    }
+
+    vtnVEC4 operator+(vtnVEC4 a) {
+        return vtnVEC4(this->x + a.x, this->y + a.y, this->z + a.z, this->w + a.w);
+    }
+    vtnVEC4 operator-(vtnVEC4 a) {
+        return vtnVEC4(this->x - a.x, this->y - a.y, this->z - a.z, this->w - a.w);
+    }
+    vtnVEC4 operator*(float a) {
+        return vtnVEC4(this->x * a, this->y * a, this->z * a, this->w * a);
+    }
+    vtnVEC4 operator/(float a);
+
+    vtnVEC4 operator*(vtnMAT4X4 m) {
+        vtnVEC4 res;
+
+        res.x = this->x * m.v[0][0] + this->y * m.v[1][0] + this->z * m.v[2][0] + this->w * m.v[3][0];
+        res.y = this->x * m.v[0][1] + this->y * m.v[1][1] + this->z * m.v[2][1] + this->w * m.v[3][1];
+        res.z = this->x * m.v[0][2] + this->y * m.v[1][2] + this->z * m.v[2][2] + this->w * m.v[3][2];
+        res.w = this->x * m.v[0][3] + this->y * m.v[1][3] + this->z * m.v[2][3] + this->w * m.v[3][3];
+
+        return res;
+    }
 };
 
 struct vtnVBUFFER {
@@ -117,17 +211,21 @@ struct vtnSCENE {
 
 struct vtnCAMERA {
     vtnVEC3 pos, rot;
-    float fov;
+    float fov, z_far, z_near;
 
-    vtnCAMERA(vtnVEC3 pos, vtnVEC3 rot, float fov) {
+    vtnCAMERA(vtnVEC3 pos, vtnVEC3 rot, float fov, float z_far, float z_near) {
         this->pos = pos;
         this->rot = rot;
         this->fov = fov;
+        this->z_far = z_far;
+        this->z_near = z_near;
     }
     vtnCAMERA() {
         this->pos = vtnVEC3();
         this->rot = vtnVEC3();
         this->fov = 3.1415;
+        this->z_far = 10;
+        this->z_near = 0.1;
     }
 };
 
@@ -142,6 +240,46 @@ struct vtnMAT3X3 {
     
     vtnMAT3X3() {
     	*this = vtnMAT3X3(0);
+    }
+
+    vtnMAT3X3 operator+(vtnMAT3X3 m) {
+        vtnMAT3X3 ret{0};
+
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
+                    ret.v[y][x] += v[y][x] + m.v[y][x];
+
+        return ret;
+    }
+
+    vtnMAT3X3 operator-(vtnMAT3X3 m) {
+        vtnMAT3X3 ret{0};
+
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
+                    ret.v[y][x] += v[y][x] - m.v[y][x];
+
+        return ret;
+    }
+
+    vtnMAT3X3 operator*(float a) {
+        vtnMAT3X3 ret{0};
+
+        for (int y = 0; y < 3; y++)
+            for (int x = 0; x < 3; x++)
+                ret.v[y][x] += v[y][x] * a;
+
+        return ret;
+    }
+
+    vtnVEC3 operator*(vtnVEC3 v) {
+        vtnVEC3 res{};
+
+        res.x = v.x * this->v[0][0] + v.y * this->v[0][1] + v.z * this->v[0][2];
+        res.y = v.x * this->v[1][0] + v.y * this->v[1][1] + v.z * this->v[1][2];
+        res.z = v.x * this->v[2][0] + v.y * this->v[2][1] + v.z * this->v[2][2];
+
+        return res;
     }
 
     vtnMAT3X3 operator*(vtnMAT3X3 m) {

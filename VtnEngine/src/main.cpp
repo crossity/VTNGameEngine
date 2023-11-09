@@ -21,7 +21,6 @@ void Display() {
     SDL_SetRenderDrawColor(vtn_renderer, VTN_COLOR_RED, 0);
     for (int i = 0; i < m.t.size(); i++)
     {
-        cout << i << endl;
         vtnVEC2 p1 = vtnRender((*m.t[i].vert_buff).v[m.t[i].p[0]]);
         vtnVEC2 p2 = vtnRender((*m.t[i].vert_buff).v[m.t[i].p[1]]);
         vtnVEC2 p3 = vtnRender((*m.t[i].vert_buff).v[m.t[i].p[2]]);
@@ -30,15 +29,17 @@ void Display() {
 }
 
 int main() {
+    vtnCAMERA main_camera{vtnVEC3(0, 0, -5), vtnVEC3(), 3.1415 / 2, 1000, 0.1};
+
     vtnInitWindow("hello", Width, Height);
-    vtnInitRenderer();
+    vtnInitRenderer(main_camera, vtnVEC2(Width, Height));
     vtnInitKeyboardFunc(Keyboard);
     vtnInitDisplayFunc(Display);
 
     if (!m.LoadFromObjectFile("models/sphere.obj"))
         cout << "failed to open file" << endl;
     for (int i = 0; i < m.vert_buffer.len; i++) {
-        m.vert_buffer.v[i].z -= 5;
+        m.vert_buffer.v[i].z += 5;
     }
 
     bool run = true;

@@ -19,6 +19,12 @@ vtnVEC3 vtnVEC3::operator/(float a) {
     return vtnVEC3(this->x / a, this->y / a, this->z / a);
 }
 
+vtnVEC4 vtnVEC4::operator/(float a) {
+    if (a == 0)
+        throw std::runtime_error("division by '0'");
+    return vtnVEC4(this->x / a, this->y / a, this->z / a, this->w / a);
+}
+
 bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured)
 {
     std::ifstream f(sFilename);
