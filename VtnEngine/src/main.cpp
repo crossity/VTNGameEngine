@@ -29,15 +29,17 @@ void Display() {
 }
 
 int main() {
+    vtnCAMERA main_camera{vtnVEC3(0, 0, -5), vtnVEC3(), 3.1415 / 2, 1000, 0.1};
+
     vtnInitWindow("hello", Width, Height);
-    vtnInitRenderer();
+    vtnInitRenderer(main_camera, vtnVEC2(Width, Height));
     vtnInitKeyboardFunc(Keyboard);
     vtnInitDisplayFunc(Display);
 
     if (!m.LoadFromObjectFile("models/sphere.obj"))
         cout << "failed to open file" << endl;
     for (int i = 0; i < m.vert_buffer.len; i++) {
-        m.vert_buffer.v[i].z -= 5;
+        m.vert_buffer.v[i].z += 5;
     }
 
     bool run = true;
