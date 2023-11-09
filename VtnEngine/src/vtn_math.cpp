@@ -1,5 +1,6 @@
 #include <cmath>
 
+#include "vtn_math.hpp"
 #include "vtn_types.hpp"
 
 float vtnVecLen(vtnVEC2 &a) {
