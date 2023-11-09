@@ -1,4 +1,4 @@
-#include <cmath>
+#pragma once
 
 #include "vtn_types.hpp"
 
