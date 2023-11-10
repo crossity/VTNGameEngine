@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 #include "vtn_renderer.hpp"
 #include "vtn_types.hpp"
@@ -11,6 +12,7 @@ vtnMAT3X3 vtn_to_camera_mat;
 vtnMAT4X4 vtn_projection_mat;
 vtnVEC2 vtn_view_port;
 vtnVEC3 vtn_camera_pos;
+float vtn_near_plane;
 
 /*
 public static Matrix3D PrespectiveFromHV(double fieldOfViewY, double aspectRatio, double zNearPlane, double zFarPlane, double mod)
@@ -61,7 +63,7 @@ void vtnUpadateCameraRot(vtnCAMERA &camera, vtnVEC3 rot) {
 }
 
 void vtnUpadateCameraPos(vtnCAMERA &camera, vtnVEC3 pos) {
-    vtn_camera_pos = camera.pos;
+    vtn_camera_pos = (camera.pos = pos);
 }
 
 vtnVEC2 vtnRender(vtnVEC3 p) {
@@ -75,6 +77,8 @@ vtnVEC2 vtnRender(vtnVEC3 p) {
     if (p_proj.w != 0)
         ret.x /= p_proj.w, ret.y /= p_proj.w;
     
+    ret.y *= -1;
+
     ret.x += 1.0;
     ret.y += 1.0;
 
@@ -96,10 +100,20 @@ void vtnRenderScene(vtnSCENE &scene) {
             vtnVEC3 t_p1 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.t[i].p[0]] - vtn_camera_pos);
             vtnVEC3 t_p2 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.t[i].p[1]] - vtn_camera_pos);
             vtnVEC3 t_p3 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.t[i].p[2]] - vtn_camera_pos);
-            vtnVEC2 p1 = vtnRender(t_p1);
-            vtnVEC2 p2 = vtnRender(t_p2);
-            vtnVEC2 p3 = vtnRender(t_p3);
-            vtnDrawTriangle(p1, p2, p3, scene.t[i].color * vtnDotProduct(vtnVEC3(0, 0, -1), n));
+
+            std::vector<vtnVEC3> tri_queue;
+            tri_queue.push_back(t_p1);
+            tri_queue.push_back(t_p2);
+            tri_queue.push_back(t_p3);
+
+            vtnTriangleClip(vtnVEC3(0, 0, vtn_near_plane), vtnVEC3(0, 0, 1), tri_queue);
+
+            for (int j = 0; j < tri_queue.size(); j += 3) {
+                vtnVEC2 p1 = vtnRender(tri_queue[j]);
+                vtnVEC2 p2 = vtnRender(tri_queue[j + 1]);
+                vtnVEC2 p3 = vtnRender(tri_queue[j + 2]);
+                vtnDrawTriangle(p1, p2, p3, scene.t[i].color * vtnDotProduct(vtnVEC3(0, 0, -1), n));
+            }
         }
     }
 }
@@ -108,6 +122,7 @@ void vtnInitRenderer(vtnCAMERA &camera, vtnVEC2 view_port) {
     vtnUpadateCameraRot(camera, camera.rot);
     vtn_view_port = view_port;
     vtn_camera_pos = camera.pos;
+    vtn_near_plane = camera.z_near;
 
     vtn_projection_mat = vtnMAT4X4(0);
     vtn_projection_mat.v[0][0] = (view_port.y / view_port.x) * (1 / tan(camera.fov * 0.5));

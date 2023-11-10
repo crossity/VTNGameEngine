@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "vtn_types.hpp"
 
 float vtnVecLen(vtnVEC2 a);
@@ -19,3 +21,6 @@ float vtnVecAngle(vtnVEC2 a, vtnVEC2 b);
 float vtnVecAngle(vtnVEC3 a, vtnVEC3 b);
 vtnVEC3 vtnCrossProduct(vtnVEC3 a, vtnVEC3 b);
 vtnMAT3X3 vtnTranspose(vtnMAT3X3 a);
+
+vtnVEC3 vtnLineIntersectPlane(vtnVEC3 plane_p, vtnVEC3 plane_n, vtnVEC3 line_start, vtnVEC3 line_end);
+void vtnTriangleClip(vtnVEC3 plane_p, vtnVEC3 plane_n, std::vector<vtnVEC3> &tri_queue);

@@ -1,3 +1,5 @@
+#define SDL_MAIN_HANDLED
+
 #include "vtn_defines.hpp"
 #include "vtn_types.hpp"
 #include "vtn_math.hpp"
