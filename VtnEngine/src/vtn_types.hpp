@@ -2,8 +2,9 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
-#define VTN_VBUFFER_SIZE 100
+#define VTN_VBUFFER_SIZE 1000
 
 typedef char int8;
 typedef unsigned char uint8;
@@ -198,15 +199,15 @@ struct vtnTRI {
     }
 };
 
-struct vtnMESH {
-    std::vector<vtnTRI> t;
+struct vtnSCENE {
     vtnVBUFFER vert_buffer;
-
-    bool LoadFromObjectFile(std::string sFilename, bool Textured = false);
+    std::vector<vtnTRI> t;
 };
 
-struct vtnSCENE {
-    std::vector<vtnMESH *> m;
+struct vtnMESH {
+    vtnSCENE *scene;
+
+    bool LoadFromObjectFile(std::string sFilename, bool Textured = false);
 };
 
 struct vtnCAMERA {
