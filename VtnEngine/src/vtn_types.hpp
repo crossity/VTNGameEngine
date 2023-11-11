@@ -206,8 +206,14 @@ struct vtnSCENE {
 
 struct vtnMESH {
     vtnSCENE *scene;
+    int vstart, vend, tstart, tend;
 
     bool LoadFromObjectFile(std::string sFilename, bool Textured = false);
+
+    void colorize(vtnVEC3 color) {
+        for (int i = this->tstart; i <= this->tend; i++)
+            scene->t[i].color = color;
+    }
 };
 
 struct vtnCAMERA {

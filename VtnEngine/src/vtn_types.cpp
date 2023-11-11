@@ -25,8 +25,7 @@ vtnVEC4 vtnVEC4::operator/(float a) {
     return vtnVEC4(this->x / a, this->y / a, this->z / a, this->w / a);
 }
 
-bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured)
-{
+bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
     std::ifstream f(sFilename);
     if (!f.is_open())
         return false;
@@ -36,6 +35,9 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured)
 
     std::string line;
     char junk;
+
+    this->vstart = this->scene->vert_buffer.len;
+    this->tstart = this->scene->t.size();
 
     while (getline(f, line)) {
         std::strstream s;
@@ -83,6 +85,9 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured)
             }
         }
     }
+
+    this->vend = this->scene->vert_buffer.len - 1;
+    this->tend = this->scene->t.size() - 1;
 
     return true;
 }

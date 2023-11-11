@@ -18,10 +18,11 @@ void Keyboard(uint8 key) {
 }
 
 void Display() {
+    vtnTimer();
     SDL_SetRenderDrawColor(vtn_renderer, VTN_COLOR_UWU, 0);
     SDL_RenderClear(vtn_renderer);
 
-    vtnUpadateCameraPos(main_camera, main_camera.pos + vtnVEC3(0, 0, 0.001));
+    vtnUpadateCameraPos(main_camera, main_camera.pos + vtnVEC3(0, 0, 0.8 * vtn_delta_time));
 
     vtnRenderScene(main_scene);
 }
@@ -36,8 +37,7 @@ int main(int argc, char** argv) {
     if (!m.LoadFromObjectFile("models/sphere.obj"))
         cout << "failed to open file" << endl;
 
-    for (int i = 0; i < main_scene.vert_buffer.len; i++)
-        main_scene.vert_buffer.v[i].y += 1;
+    m.colorize(vtnVEC3(VTN_COLOR_OWO));
 
     bool run = true;
 
