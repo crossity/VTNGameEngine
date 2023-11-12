@@ -67,9 +67,9 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
                     s >> face[i] >> junk >> uvs[i];
                 this->scene->tris.push_back(vtnTRI(
                     &(this->scene->vert_buffer),
-                    face[0] - 1,
-                    face[1] - 1,
-                    face[2] - 1,
+                    face[0] - 1 + this->vstart,
+                    face[1] - 1 + this->vstart,
+                    face[2] - 1 + this->vstart,
                     vtnVEC3(255, 255, 255),
                     texts[uvs[0] - 1],
                     texts[uvs[1] - 1],
@@ -81,7 +81,7 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
                 int face[3];
                 for (int i = 0; i < 3; i++)
                     s >> face[i];
-                this->scene->tris.push_back(vtnTRI(&(this->scene->vert_buffer), face[0] - 1, face[1] - 1, face[2] - 1));
+                this->scene->tris.push_back(vtnTRI(&(this->scene->vert_buffer), face[0] - 1 + this->vstart, face[1] - 1 + this->vstart, face[2] - 1 + this->vstart));
             }
         }
     }

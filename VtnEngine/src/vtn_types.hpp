@@ -199,6 +199,12 @@ struct vtnTRI {
     }
 };
 
+struct vtnSCENE {
+    vtnVBUFFER vert_buffer;
+    std::vector<vtnTRI> tris;
+    std::vector<vtnVEC3> lights;
+};
+
 struct vtnMESH {
     vtnSCENE *scene;
     int vstart, vend, tstart, tend;
@@ -220,7 +226,11 @@ struct vtnMESH {
 };
 
 struct vtnNODE {
-    vtnVEC3 pos = vtnVEC3(), glob_pos = vtnVEC3();
+public:
+    vtnVEC3 glob_pos = vtnVEC3();
+
+public:
+    vtnVEC3 pos = vtnVEC3();
 
     std::vector<vtnNODE *> child;
     vtnMESH mesh;
@@ -238,27 +248,32 @@ struct vtnNODE {
         child.push_back(ptr);
     }
 
-    void update_mesh(vtnVEC3 new_global_pos) {
+    void update_mesh(vtnVEC3 p_glob_pos) {
+        vtnVEC3 new_glob_pos = p_glob_pos + this->pos;
+        vtnVEC3 mov = new_glob_pos - this->glob_pos;
+        this->glob_pos = new_glob_pos;
 
+        for (int i = 0; i < child.size(); i++)
+            (this->child[i])->update_mesh(this->glob_pos);
+        
+        for (int i = this->mesh.vstart; i <= this->mesh.vend; i++) {
+            (this->mesh.scene)->vert_buffer.v[i] = (*(this->mesh.scene)).vert_buffer.v[i] + mov;
+        }
     }
 };
 
-struct vtnSCENE {
-    vtnVBUFFER vert_buffer;
-    std::vector<vtnTRI> tris;
-    std::vector<vtnVEC3> lights;
-
+struct vtnORIGIN {
     std::vector<vtnNODE *> child;
-
-    ~vtnSCENE() {
-        for (int i = 0; i < child.size(); i++)
-            child[i]->~vtnNODE();
-    }
 
     void add_child() {
         vtnNODE *ptr = new vtnNODE;
 
-        child.push_back(ptr);
+        this->child.push_back(ptr);
+    }
+
+    void update_mesh() {
+        for (int i = 0; i < child.size(); i++)
+            (this->child[i])->update_mesh(vtnVEC3());
     }
 };
 
