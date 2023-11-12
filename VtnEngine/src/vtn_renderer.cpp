@@ -89,17 +89,17 @@ vtnVEC2 vtnRender(vtnVEC3 p) {
 }
 
 void vtnRenderScene(vtnSCENE &scene) {
-    for (int i = 0; i < scene.t.size(); i++) {
-        vtnVEC3 t_center = ((scene.vert_buffer).v[scene.t[i].p[0]] + (scene.vert_buffer).v[scene.t[i].p[1]] + (scene.vert_buffer).v[scene.t[i].p[2]]) / 3.f;
+    for (int i = 0; i < scene.tris.size(); i++) {
+        vtnVEC3 t_center = ((scene.vert_buffer).v[scene.tris[i].p[0]] + (scene.vert_buffer).v[scene.tris[i].p[1]] + (scene.vert_buffer).v[scene.tris[i].p[2]]) / 3.f;
         vtnVEC3 camera_ray = vtnVecNorm(t_center - vtn_camera_pos);
-        vtnVEC3 line1 = (scene.vert_buffer).v[scene.t[i].p[1]] - (scene.vert_buffer).v[scene.t[i].p[0]];
-        vtnVEC3 line2 = (scene.vert_buffer).v[scene.t[i].p[2]] - (scene.vert_buffer).v[scene.t[i].p[0]];
+        vtnVEC3 line1 = (scene.vert_buffer).v[scene.tris[i].p[1]] - (scene.vert_buffer).v[scene.tris[i].p[0]];
+        vtnVEC3 line2 = (scene.vert_buffer).v[scene.tris[i].p[2]] - (scene.vert_buffer).v[scene.tris[i].p[0]];
         vtnVEC3 n = vtnVecNorm(vtnCrossProduct(line1, line2));
         float dp = vtnDotProduct(n, camera_ray * -1);
         if (dp >= 0) {
-            vtnVEC3 t_p1 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.t[i].p[0]] - vtn_camera_pos);
-            vtnVEC3 t_p2 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.t[i].p[1]] - vtn_camera_pos);
-            vtnVEC3 t_p3 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.t[i].p[2]] - vtn_camera_pos);
+            vtnVEC3 t_p1 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.tris[i].p[0]] - vtn_camera_pos);
+            vtnVEC3 t_p2 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.tris[i].p[1]] - vtn_camera_pos);
+            vtnVEC3 t_p3 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.tris[i].p[2]] - vtn_camera_pos);
 
             std::vector<vtnVEC3> tri_queue;
             tri_queue.push_back(t_p1);
@@ -108,11 +108,17 @@ void vtnRenderScene(vtnSCENE &scene) {
 
             vtnTriangleClip(vtnVEC3(0, 0, vtn_near_plane), vtnVEC3(0, 0, 1), tri_queue);
 
+            float light_dp = 0;
+
+            for (int j = 0; j < scene.lights.size(); j++)
+                light_dp += std::fmax(vtnDotProduct(scene.lights[j], n), 0.f);
+            light_dp = std::fmin(light_dp, 1.f);
+
             for (int j = 0; j < tri_queue.size(); j += 3) {
                 vtnVEC2 p1 = vtnRender(tri_queue[j]);
                 vtnVEC2 p2 = vtnRender(tri_queue[j + 1]);
                 vtnVEC2 p3 = vtnRender(tri_queue[j + 2]);
-                vtnDrawTriangle(p1, p2, p3, scene.t[i].color * vtnDotProduct(vtnVEC3(0, 0, -1), n));
+                vtnDrawTriangle(p1, p2, p3, scene.tris[i].color * light_dp);
             }
         }
     }

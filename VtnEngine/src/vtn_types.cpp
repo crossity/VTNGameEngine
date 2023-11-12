@@ -37,7 +37,7 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
     char junk;
 
     this->vstart = this->scene->vert_buffer.len;
-    this->tstart = this->scene->t.size();
+    this->tstart = this->scene->tris.size();
 
     while (getline(f, line)) {
         std::strstream s;
@@ -65,7 +65,7 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
                 int uvs[3];
                 for (int i = 0; i < 3; i++)
                     s >> face[i] >> junk >> uvs[i];
-                this->scene->t.push_back(vtnTRI(
+                this->scene->tris.push_back(vtnTRI(
                     &(this->scene->vert_buffer),
                     face[0] - 1,
                     face[1] - 1,
@@ -81,13 +81,13 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
                 int face[3];
                 for (int i = 0; i < 3; i++)
                     s >> face[i];
-                this->scene->t.push_back(vtnTRI(&(this->scene->vert_buffer), face[0] - 1, face[1] - 1, face[2] - 1));
+                this->scene->tris.push_back(vtnTRI(&(this->scene->vert_buffer), face[0] - 1, face[1] - 1, face[2] - 1));
             }
         }
     }
 
     this->vend = this->scene->vert_buffer.len - 1;
-    this->tend = this->scene->t.size() - 1;
+    this->tend = this->scene->tris.size() - 1;
 
     return true;
 }

@@ -199,20 +199,66 @@ struct vtnTRI {
     }
 };
 
-struct vtnSCENE {
-    vtnVBUFFER vert_buffer;
-    std::vector<vtnTRI> t;
-};
-
 struct vtnMESH {
     vtnSCENE *scene;
     int vstart, vend, tstart, tend;
 
     bool LoadFromObjectFile(std::string sFilename, bool Textured = false);
 
+    vtnMESH(vtnSCENE *scene, std::string path, bool textured = false) {
+        this->scene = scene;
+        this->LoadFromObjectFile(path, textured);
+    }
+
+    vtnMESH() {
+    }
+
     void colorize(vtnVEC3 color) {
         for (int i = this->tstart; i <= this->tend; i++)
-            scene->t[i].color = color;
+            scene->tris[i].color = color;
+    }
+};
+
+struct vtnNODE {
+    vtnVEC3 pos = vtnVEC3(), glob_pos = vtnVEC3();
+
+    std::vector<vtnNODE *> child;
+    vtnMESH mesh;
+
+    ~vtnNODE() {
+        for (int i = 0; i < child.size(); i++) {
+            child[i]->~vtnNODE();
+        }
+        delete this;
+    }
+
+    void add_child() {
+        vtnNODE *ptr = new vtnNODE;
+
+        child.push_back(ptr);
+    }
+
+    void update_mesh(vtnVEC3 new_global_pos) {
+
+    }
+};
+
+struct vtnSCENE {
+    vtnVBUFFER vert_buffer;
+    std::vector<vtnTRI> tris;
+    std::vector<vtnVEC3> lights;
+
+    std::vector<vtnNODE *> child;
+
+    ~vtnSCENE() {
+        for (int i = 0; i < child.size(); i++)
+            child[i]->~vtnNODE();
+    }
+
+    void add_child() {
+        vtnNODE *ptr = new vtnNODE;
+
+        child.push_back(ptr);
     }
 };
 
