@@ -1,0 +1,14 @@
+m = "models/sphere.obj"
+
+sphere2 {
+    mesh(m)
+    pos(1, 0, 0)
+}
+
+sphere {
+    mesh(m)
+    pos(0, 0, 0)
+    add(sphere2)
+}
+
+place(sphere)

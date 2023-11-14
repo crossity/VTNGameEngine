@@ -33,21 +33,27 @@ int main(int argc, char** argv) {
     vtnInitKeyboardFunc(Keyboard);
     vtnInitDisplayFunc(Display);
 
-    vtnMESH m1{&main_scene, "models/sphere.obj"}, m2{&main_scene, "models/sphere.obj"};
+    /* vtnMESH m1{&main_scene, "models/sphere.obj"}, m2{&main_scene, "models/sphere.obj"}; */
 
     main_scene.lights.push_back(vtnVecNorm(vtnVEC3(1, -1, -1)));
 
-    m1.colorize(vtnVEC3(VTN_COLOR_OWO));
+    /* m1.colorize(vtnVEC3(VTN_COLOR_OWO));
     m2.colorize(vtnVEC3(VTN_COLOR_RED));
+    */
 
-    main_origin.add_child();
+    /* main_origin.add_child();
     (main_origin.child[0])->mesh = m1;
     (main_origin.child[0])->pos = vtnVEC3(0, 1, 0);
     main_origin.child[0]->add_child();
     main_origin.child[0]->child[0]->mesh = m2;
     main_origin.child[0]->child[0]->pos = vtnVEC3(1, 0, 0);
+    */
+
+   vtnLoadToScene(main_scene, main_origin, "scripts/main.script");
 
     main_origin.update_mesh();
+
+    main_origin.print();
 
     bool run = true;
 

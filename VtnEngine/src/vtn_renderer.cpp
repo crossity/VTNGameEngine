@@ -1,6 +1,8 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <cstring>
+#include <algorithm>
 
 #include "vtn_renderer.hpp"
 #include "vtn_types.hpp"
@@ -89,17 +91,29 @@ vtnVEC2 vtnRender(vtnVEC3 p) {
 }
 
 void vtnRenderScene(vtnSCENE &scene) {
-    for (int i = 0; i < scene.tris.size(); i++) {
-        vtnVEC3 t_center = ((scene.vert_buffer).v[scene.tris[i].p[0]] + (scene.vert_buffer).v[scene.tris[i].p[1]] + (scene.vert_buffer).v[scene.tris[i].p[2]]) / 3.f;
+    std::vector<vtnTRI> tris(scene.tris.size());
+    memcpy(tris.data(), scene.tris.data(), sizeof(vtnTRI) * scene.tris.size());
+    std::sort(tris.begin(), tris.end(), [&](vtnTRI a, vtnTRI b) {
+        vtnVEC3 ca = scene.vert_buffer.v[a.p[0]] + scene.vert_buffer.v[a.p[1]] + scene.vert_buffer.v[a.p[2]];
+        vtnVEC3 cb = scene.vert_buffer.v[b.p[0]] + scene.vert_buffer.v[b.p[1]] + scene.vert_buffer.v[b.p[2]];
+        ca = ca / 3.f;
+        cb = cb / 3.f;
+        float da = vtnDist2(vtn_camera_pos, ca);
+        float db = vtnDist2(vtn_camera_pos, cb);
+        return db < da;
+    });
+
+    for (int i = 0; i < tris.size(); i++) {
+        vtnVEC3 t_center = ((scene.vert_buffer).v[tris[i].p[0]] + (scene.vert_buffer).v[tris[i].p[1]] + (scene.vert_buffer).v[tris[i].p[2]]) / 3.f;
         vtnVEC3 camera_ray = vtnVecNorm(t_center - vtn_camera_pos);
-        vtnVEC3 line1 = (scene.vert_buffer).v[scene.tris[i].p[1]] - (scene.vert_buffer).v[scene.tris[i].p[0]];
-        vtnVEC3 line2 = (scene.vert_buffer).v[scene.tris[i].p[2]] - (scene.vert_buffer).v[scene.tris[i].p[0]];
+        vtnVEC3 line1 = (scene.vert_buffer).v[tris[i].p[1]] - (scene.vert_buffer).v[tris[i].p[0]];
+        vtnVEC3 line2 = (scene.vert_buffer).v[tris[i].p[2]] - (scene.vert_buffer).v[tris[i].p[0]];
         vtnVEC3 n = vtnVecNorm(vtnCrossProduct(line1, line2));
         float dp = vtnDotProduct(n, camera_ray * -1);
         if (dp >= 0) {
-            vtnVEC3 t_p1 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.tris[i].p[0]] - vtn_camera_pos);
-            vtnVEC3 t_p2 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.tris[i].p[1]] - vtn_camera_pos);
-            vtnVEC3 t_p3 = vtn_to_camera_mat * ((scene.vert_buffer).v[scene.tris[i].p[2]] - vtn_camera_pos);
+            vtnVEC3 t_p1 = vtn_to_camera_mat * ((scene.vert_buffer).v[tris[i].p[0]] - vtn_camera_pos);
+            vtnVEC3 t_p2 = vtn_to_camera_mat * ((scene.vert_buffer).v[tris[i].p[1]] - vtn_camera_pos);
+            vtnVEC3 t_p3 = vtn_to_camera_mat * ((scene.vert_buffer).v[tris[i].p[2]] - vtn_camera_pos);
 
             std::vector<vtnVEC3> tri_queue;
             tri_queue.push_back(t_p1);
@@ -118,7 +132,7 @@ void vtnRenderScene(vtnSCENE &scene) {
                 vtnVEC2 p1 = vtnRender(tri_queue[j]);
                 vtnVEC2 p2 = vtnRender(tri_queue[j + 1]);
                 vtnVEC2 p3 = vtnRender(tri_queue[j + 2]);
-                vtnDrawTriangle(p1, p2, p3, scene.tris[i].color * light_dp);
+                vtnDrawTriangle(p1, p2, p3, tris[i].color * light_dp);
             }
         }
     }

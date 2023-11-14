@@ -30,6 +30,8 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
     if (!f.is_open())
         return false;
 
+    this->path = sFilename;
+
     // Local cache of verts
     std::vector<vtnVEC2> texts;
 

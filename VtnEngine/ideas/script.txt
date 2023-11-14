@@ -1,0 +1,13 @@
+wall = "wall.obj"
+window = "wall.obj"
+
+house {
+    add(wall, [0, 1, 0], [0, 0, 0], [255, 255, 0])
+    add(window, [0, 1, 0], [0, 0, 0], [255, 255, 0])
+}
+
+city {
+    add(house, [0, 0, 0], [1, 1, 2])
+}
+
+place(city)

@@ -184,6 +184,20 @@ struct vtnTRI {
     bool lighted;
     vtnVBUFFER *vert_buff;
 
+    vtnTRI() {
+        this->vert_buff = nullptr;
+
+        this->p[0] = -1;
+        this->p[1] = -1;
+        this->p[2] = -1;
+
+        this->color = vtnVEC3();
+
+        this->uv[0] = vtnVEC2();
+        this->uv[1] = vtnVEC2();
+        this->uv[2] = vtnVEC2();
+    }
+
     vtnTRI(vtnVBUFFER *vert_buff, int p1, int p2, int p3, vtnVEC3 color = vtnVEC3(255, 255, 255), vtnVEC2 uv1 = vtnVEC2(), vtnVEC2 uv2 = vtnVEC2(), vtnVEC2 uv3 = vtnVEC2()) {
         this->vert_buff = vert_buff;
 
@@ -208,6 +222,7 @@ struct vtnSCENE {
 struct vtnMESH {
     vtnSCENE *scene;
     int vstart, vend, tstart, tend;
+    std::string path;
 
     bool LoadFromObjectFile(std::string sFilename, bool Textured = false);
 
@@ -260,6 +275,13 @@ public:
             (this->mesh.scene)->vert_buffer.v[i] = (*(this->mesh.scene)).vert_buffer.v[i] + mov;
         }
     }
+
+    void print(std::string starter) {
+        for (int i = 0; i < child.size(); i++) {
+            std::cout << starter << child[i]->mesh.path << ": [" << child[i]->pos.x << ", " << child[i]->pos.y << ", " << child[i]->pos.z << "]" << std::endl;
+            child[i]->print(starter + "  ");
+        }
+    }
 };
 
 struct vtnORIGIN {
@@ -274,6 +296,13 @@ struct vtnORIGIN {
     void update_mesh() {
         for (int i = 0; i < child.size(); i++)
             (this->child[i])->update_mesh(vtnVEC3());
+    }
+
+    void print() {
+        for (int i = 0; i < child.size(); i++) {
+            std::cout << child[i]->mesh.path << ": [" << child[i]->pos.x << ", " << child[i]->pos.y << ", " << child[i]->pos.z << "]" << std::endl;
+            child[i]->print("  ");
+        }
     }
 };
 
