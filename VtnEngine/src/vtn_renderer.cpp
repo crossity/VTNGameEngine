@@ -96,8 +96,6 @@ void vtnRenderScene(vtnSCENE &scene) {
     std::sort(tris.begin(), tris.end(), [&](vtnTRI a, vtnTRI b) {
         vtnVEC3 ca = scene.vert_buffer.v[a.p[0]] + scene.vert_buffer.v[a.p[1]] + scene.vert_buffer.v[a.p[2]];
         vtnVEC3 cb = scene.vert_buffer.v[b.p[0]] + scene.vert_buffer.v[b.p[1]] + scene.vert_buffer.v[b.p[2]];
-        ca = ca / 3.f;
-        cb = cb / 3.f;
         float da = vtnDist2(vtn_camera_pos, ca);
         float db = vtnDist2(vtn_camera_pos, cb);
         return db < da;

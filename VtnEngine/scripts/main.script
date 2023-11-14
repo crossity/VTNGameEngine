@@ -2,13 +2,13 @@ m = "models/sphere.obj"
 
 sphere2 {
     mesh(m)
-    pos(1, 0, 0)
+    pos(0, 1, 0)
 }
 
 sphere {
-    mesh(m)
+    mesh(m, [0, 0, 0], [255, 0, 0])
     pos(0, 0, 0)
-    add(sphere2)
+    add(sphere2, [1, 0, 0])
 }
 
 place(sphere)

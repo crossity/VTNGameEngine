@@ -102,6 +102,20 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
                 if (path == "")
                     throw(std::runtime_error("no such mesh '" + args[0] + "'"));
                 meshes.push_back(vtnMESH(&scene, path));
+
+                vtnVEC3 pos = vtnVEC3();
+                if (args.size() >= 4) {
+                    pos = vtnVEC3(atof(args[1].c_str()), atof(args[2].c_str()), atof(args[3].c_str()));
+                }
+
+                if (args.size() >= 7) {
+                    vtnVEC3 color = vtnVEC3(atof(args[4].c_str()), atof(args[5].c_str()), atof(args[6].c_str()));
+                    meshes[meshes.size() - 1].colorize(color);
+                }
+
+                for (int i = meshes[meshes.size() - 1].vstart; i <= meshes[meshes.size() - 1].vend; i++)
+                    scene.vert_buffer.v[i] = scene.vert_buffer.v[i] + pos;
+
                 if (node == nullptr) {
                     origin.child[origin.child.size() - 1]->mesh = meshes[meshes.size() - 1];
                 }
@@ -144,6 +158,17 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
                     }
                     ind--;
                 }
+
+                vtnVEC3 pos = vtnVEC3();
+                if (args.size() >= 4) {
+                    pos = vtnVEC3(atof(args[1].c_str()), atof(args[2].c_str()), atof(args[3].c_str()));
+                }
+                if (node == nullptr)
+                    origin.child[origin.child.size() - 1]->child[origin.child[origin.child.size() - 1]->child.size() - 1]->pos = 
+                        origin.child[origin.child.size() - 1]->child[origin.child[origin.child.size() - 1]->child.size() - 1]->pos + pos;
+                else
+                    origin.child[origin.child.size() - 1]->child[origin.child[origin.child.size() - 1]->child.size() - 1]->pos = 
+                        origin.child[origin.child.size() - 1]->child[origin.child[origin.child.size() - 1]->child.size() - 1]->pos + pos;
             }
         }
         start++;
