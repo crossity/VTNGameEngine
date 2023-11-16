@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+#include <SDL2/SDL_image.h>
+
 #define VTN_VBUFFER_SIZE 1000
 
 typedef char int8;
@@ -14,6 +16,8 @@ typedef int int32;
 typedef unsigned int uint32;
 typedef long long int64;
 typedef unsigned long long uint64;
+
+typedef SDL_Texture vtnTEXTURE;
 
 struct vtnMAT4X4 {
     float v[4][4];
@@ -181,8 +185,9 @@ struct vtnTRI {
     int p[3];
     vtnVEC3 color;
     vtnVEC2 uv[3];
-    bool lighted;
     vtnVBUFFER *vert_buff;
+    bool textured = false;
+    vtnTEXTURE **texture;    
 
     vtnTRI() {
         this->vert_buff = nullptr;
@@ -237,6 +242,13 @@ struct vtnMESH {
     void colorize(vtnVEC3 color) {
         for (int i = this->tstart; i <= this->tend; i++)
             scene->tris[i].color = color;
+    }
+
+    void texturize(vtnTEXTURE **texture) {
+        for (int i = this->tstart; i <= this->tend; i++) {
+            this->scene->tris[i].texture = texture;
+            this->scene->tris[i].textured = true;
+        }
     }
 };
 

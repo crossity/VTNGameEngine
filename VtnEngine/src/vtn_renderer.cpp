@@ -117,8 +117,12 @@ void vtnRenderScene(vtnSCENE &scene) {
             tri_queue.push_back(t_p1);
             tri_queue.push_back(t_p2);
             tri_queue.push_back(t_p3);
+            std::vector<vtnVEC2> uv_queue;
+            uv_queue.push_back(tris[i].uv[0]);
+            uv_queue.push_back(tris[i].uv[1]);
+            uv_queue.push_back(tris[i].uv[2]);
 
-            vtnTriangleClip(vtnVEC3(0, 0, vtn_near_plane), vtnVEC3(0, 0, 1), tri_queue);
+            vtnTriangleClip(vtnVEC3(0, 0, vtn_near_plane), vtnVEC3(0, 0, 1), tri_queue, uv_queue);
 
             float light_dp = 0;
 
@@ -130,7 +134,10 @@ void vtnRenderScene(vtnSCENE &scene) {
                 vtnVEC2 p1 = vtnRender(tri_queue[j]);
                 vtnVEC2 p2 = vtnRender(tri_queue[j + 1]);
                 vtnVEC2 p3 = vtnRender(tri_queue[j + 2]);
-                vtnDrawTriangle(p1, p2, p3, tris[i].color * light_dp);
+                if (tris[i].textured)
+                    vtnDrawTexturedTriangle(p1, p2, p3, uv_queue[j], uv_queue[j + 1], uv_queue[j + 2], *(tris[i].texture), tris[i].color * light_dp);
+                else
+                    vtnDrawTriangle(p1, p2, p3, tris[i].color * light_dp);
             }
         }
     }

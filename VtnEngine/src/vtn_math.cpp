@@ -101,18 +101,18 @@ vtnMAT3X3 vtnTranspose(vtnMAT3X3 a)
     return b;
 }
 
-vtnVEC3 vtnLineIntersectPlane(vtnVEC3 plane_p, vtnVEC3 plane_n, vtnVEC3 line_start, vtnVEC3 line_end)
+vtnVEC3 vtnLineIntersectPlane(vtnVEC3 plane_p, vtnVEC3 plane_n, vtnVEC3 line_start, vtnVEC3 line_end, float *t)
 {
     float plane_d = -vtnDotProduct(plane_n, plane_p);
     float ad = vtnDotProduct(line_start, plane_n);
     float bd = vtnDotProduct(line_end, plane_n);
-    float t = (-plane_d - ad) / (bd - ad);
+    *t = (-plane_d - ad) / (bd - ad);
     vtnVEC3 line_start_to_end = line_end - line_start;
-    vtnVEC3 line_to_intersect = line_start_to_end * t;
+    vtnVEC3 line_to_intersect = line_start_to_end * (*t);
     return line_start + line_to_intersect;
 }
 
-void vtnTriangleClip(vtnVEC3 plane_p, vtnVEC3 plane_n, std::vector<vtnVEC3> &tri_queue)
+void vtnTriangleClip(vtnVEC3 plane_p, vtnVEC3 plane_n, std::vector<vtnVEC3> &tri_queue, std::vector<vtnVEC2> &uv_queue)
 {
     auto dist = [&](vtnVEC3 &p)
     {
@@ -124,6 +124,10 @@ void vtnTriangleClip(vtnVEC3 plane_p, vtnVEC3 plane_n, std::vector<vtnVEC3> &tri
     int nInsidePointCount = 0;
     int outside_points[3];
     int nOutsidePointCount = 0;
+    int inside_uvs[3];
+    int nInsideUVCount = 0;
+    int outside_uvs[3];
+    int nOutsideUVCount = 0;
 
     float d0 = dist(tri_queue[0]);
     float d1 = dist(tri_queue[1]);
@@ -132,31 +136,38 @@ void vtnTriangleClip(vtnVEC3 plane_p, vtnVEC3 plane_n, std::vector<vtnVEC3> &tri
     if (d0 >= 0)
     {
         inside_points[nInsidePointCount++] = 0;
+        inside_uvs[nInsideUVCount++] = 0;
     }
     else
     {
         outside_points[nOutsidePointCount++] = 0;
+        outside_uvs[nOutsideUVCount++] = 0;
     }
     if (d1 >= 0)
     {
         inside_points[nInsidePointCount++] = 1;
+        inside_uvs[nInsideUVCount++] = 1;
     }
     else
     {
         outside_points[nOutsidePointCount++] = 1;
+        outside_uvs[nOutsideUVCount++] = 1;
     }
     if (d2 >= 0)
     {
         inside_points[nInsidePointCount++] = 2;
+        inside_uvs[nInsideUVCount++] = 2;
     }
     else
     {
         outside_points[nOutsidePointCount++] = 2;
+        outside_uvs[nOutsideUVCount++] = 2;
     }
 
     if (nInsidePointCount == 0)
     {
         tri_queue.clear();
+        uv_queue.clear();
     }
 
     if (nInsidePointCount == 3)
@@ -166,21 +177,37 @@ void vtnTriangleClip(vtnVEC3 plane_p, vtnVEC3 plane_n, std::vector<vtnVEC3> &tri
     if (nInsidePointCount == 1 && nOutsidePointCount == 2)
     {
         tri_queue.push_back(tri_queue[inside_points[0]]);
-        tri_queue.push_back(vtnLineIntersectPlane(plane_p, plane_n, tri_queue[inside_points[0]], tri_queue[outside_points[0]]));
-        tri_queue.push_back(vtnLineIntersectPlane(plane_p, plane_n, tri_queue[inside_points[0]], tri_queue[outside_points[1]]));
+        uv_queue.push_back(uv_queue[inside_uvs[0]]);
+
+        float t;
+        tri_queue.push_back(vtnLineIntersectPlane(plane_p, plane_n, tri_queue[inside_points[0]], tri_queue[outside_points[0]], &t));
+        uv_queue.push_back((uv_queue[outside_uvs[0]] - uv_queue[inside_uvs[0]]) * t + uv_queue[inside_uvs[0]]);
+        tri_queue.push_back(vtnLineIntersectPlane(plane_p, plane_n, tri_queue[inside_points[0]], tri_queue[outside_points[1]], &t));
+        uv_queue.push_back((uv_queue[outside_uvs[1]] - uv_queue[inside_uvs[0]]) * t + uv_queue[inside_uvs[0]]);
 
         tri_queue.erase(tri_queue.begin(), tri_queue.begin() + 3);
+        uv_queue.erase(uv_queue.begin(), uv_queue.begin() + 3);
     }
 
     if (nInsidePointCount == 2 && nOutsidePointCount == 1)
     {
         tri_queue.push_back(tri_queue[inside_points[0]]);
         tri_queue.push_back(tri_queue[inside_points[1]]);
-        tri_queue.push_back(vtnLineIntersectPlane(plane_p, plane_n, tri_queue[inside_points[0]], tri_queue[outside_points[0]]));
+        uv_queue.push_back(uv_queue[inside_uvs[0]]);
+        uv_queue.push_back(uv_queue[inside_uvs[1]]);
+
+        float t;
+        tri_queue.push_back(vtnLineIntersectPlane(plane_p, plane_n, tri_queue[inside_points[0]], tri_queue[outside_points[0]], &t));
+        uv_queue.push_back((uv_queue[outside_uvs[0]] - uv_queue[inside_uvs[0]]) * t + uv_queue[inside_uvs[0]]);
 
         tri_queue.push_back(tri_queue[inside_points[1]]);
+        uv_queue.push_back(uv_queue[inside_uvs[1]]);
         tri_queue.push_back(tri_queue[5]);
-        tri_queue.push_back(vtnLineIntersectPlane(plane_p, plane_n, tri_queue[inside_points[1]], tri_queue[outside_points[0]]));
+        uv_queue.push_back(uv_queue[5]);
+        tri_queue.push_back(vtnLineIntersectPlane(plane_p, plane_n, tri_queue[inside_points[1]], tri_queue[outside_points[0]], &t));
+        uv_queue.push_back((uv_queue[outside_uvs[0]] - uv_queue[inside_uvs[1]]) * t + uv_queue[inside_uvs[1]]);
+
         tri_queue.erase(tri_queue.begin(), tri_queue.begin() + 3);
+        uv_queue.erase(uv_queue.begin(), uv_queue.begin() + 3);
     }
 }
