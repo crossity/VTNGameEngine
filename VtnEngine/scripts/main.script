@@ -1,14 +1,11 @@
-m = "models/sphere.obj"
+$define model_path "models/box.obj"
 
-sphere2 {
-    mesh(m)
-    pos(0, 1, 0)
-}
+m = model_path
+t = "textures/block.png"
 
 sphere {
-    mesh(m, [0, 0, 0], [255, 0, 0])
+    mesh(m, TEXTURED, t, [0, 0, 0], [255, 255, 255])
     pos(0, 0, 0)
-    add(sphere2, [1, 0, 0])
 }
 
 place(sphere)

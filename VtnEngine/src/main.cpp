@@ -15,8 +15,6 @@ vtnORIGIN main_origin;
 vtnCAMERA main_camera{vtnVEC3(0, 0, -5), vtnVEC3(0, 0, 0), 3.1415 / 2, 1000, 0.1};
 vtnVEC3 light_dir{0, 0, -1};
 
-vtnTEXTURE *texture = nullptr;
-
 void Keyboard(uint8 key) {
     cout << key << endl;
 }
@@ -58,11 +56,7 @@ int main(int argc, char** argv) {
 
     main_scene.lights.push_back(vtnVecNorm(vtnVEC3(1, -1, -1)));
 
-    vtnLoadFromPNG(&texture, "textures/block.png");
-
-   vtnLoadToScene(main_scene, main_origin, "scripts/main.script");
-
-   (main_origin.child[0])->mesh.texturize(&texture);
+    vtnLoadToScene(main_scene, main_origin, "scripts/main.script");
 
     main_origin.update_mesh();
 
@@ -73,9 +67,6 @@ int main(int argc, char** argv) {
     while (run) {
         vtnUpdate(run);
     }
-    SDL_DestroyTexture(texture);
-
-    vtnQuit();
 
     return 0;
 }

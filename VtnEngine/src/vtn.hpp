@@ -9,3 +9,8 @@
 #include "vtn_draw.hpp"
 #include "vtn_timer.hpp"
 #include "vtn_scripter.hpp"
+
+void vtnQuit() {
+    vtnQuitWindow();
+    vtnQuitScripter();
+}

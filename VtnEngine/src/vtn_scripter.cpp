@@ -2,11 +2,14 @@
 #include <fstream>
 #include <vector>
 #include <stdexcept>
+#include <SDL2/SDL.h>
 
 #include "vtn_scripter.hpp"
 #include "vtn_types.hpp"
+#include "vtn_draw.hpp"
 
 std::vector<vtnMESH> meshes;
+std::vector<vtnTEXTURE *> textures;
 
 bool IsSpace( char c )
 {
@@ -100,20 +103,40 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
                 }
 
                 bool textured = false;
-                if (args.size() >= 2)
-                    textured = args[7][0] - '0';
+                if (args.size() >= 2) {
+                    if (args[1] == "TEXTURED")
+                        textured = true;
+                    else if (args[1] == "UNTEXTURED")
+                        textured = false;
+                    else
+                        textured = args[1][0] - '0';
+                }
                 
                 if (path == "")
                     throw(std::runtime_error("no such mesh '" + args[0] + "'"));
                 meshes.push_back(vtnMESH(&scene, path, textured));
 
-                vtnVEC3 pos = vtnVEC3();
-                if (args.size() >= 5) {
-                    pos = vtnVEC3(atof(args[2].c_str()), atof(args[3].c_str()), atof(args[4].c_str()));
+                if (args.size() >= 3 && textured) {
+                    std::string texture_path = "";
+                    for (int i = 1; i < start; i++) {
+                        if (words[i] == "=" && words[i - 1] == args[2]) {
+                            texture_path = words[i + 1];
+                            break;
+                        }
+                    }
+                    textures.push_back(nullptr);
+                    vtnLoadFromPNG(&textures[textures.size() - 1], texture_path);
+
+                    meshes[meshes.size() - 1].texturize(&textures[textures.size() - 1]);
                 }
 
-                if (args.size() >= 8) {
-                    vtnVEC3 color = vtnVEC3(atof(args[5].c_str()), atof(args[6].c_str()), atof(args[7].c_str()));
+                vtnVEC3 pos = vtnVEC3();
+                if (args.size() >= 5 + textured) {
+                    pos = vtnVEC3(atof(args[2 + textured].c_str()), atof(args[3 + textured].c_str()), atof(args[4 + textured].c_str()));
+                }
+
+                if (args.size() >= 8 + textured) {
+                    vtnVEC3 color = vtnVEC3(atof(args[5 + textured].c_str()), atof(args[6 + textured].c_str()), atof(args[7 + textured].c_str()));
                     meshes[meshes.size() - 1].colorize(color);
                 }
 
@@ -182,6 +205,15 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
 void vtnLoadToScene(vtnSCENE &scene, vtnORIGIN &origin, std::string file_path) {
     std::vector<std::string> words = vtnGetWords(file_path);
 
+    for (int i = 0; i < words.size(); i++) {
+        if (words[i] == "$define") {
+            for (int j = i + 3; j < words.size(); j++) {
+                if (words[i + 1] == words[j])
+                    words[j] = words[i + 2];
+            }
+        }
+    }
+
     for (int w = 0; w < words.size(); w++) {
         if (words[w] == "(" && w > 0) {
             if (words[w - 1] == "place") {
@@ -195,4 +227,9 @@ void vtnLoadToScene(vtnSCENE &scene, vtnORIGIN &origin, std::string file_path) {
             }
         }
     }
+}
+
+void vtnQuitScripter() {
+    for (int i = 0; i < textures.size(); i++)
+        SDL_DestroyTexture(textures[i]);
 }

@@ -24,7 +24,7 @@ void vtnInitWindow(std::string Name, uint16 Width, uint16 Height) {
     vtn_renderer = SDL_CreateRenderer(vtn_window, -1, SDL_RENDERER_ACCELERATED);
 }
 
-void vtnQuit() {
+void vtnQuitWindow() {
     SDL_DestroyRenderer(vtn_renderer);
     SDL_DestroyWindow(vtn_window);
     SDL_Quit();
