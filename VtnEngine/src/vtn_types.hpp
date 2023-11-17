@@ -262,6 +262,9 @@ public:
     std::vector<vtnNODE *> child;
     vtnMESH mesh;
 
+    vtnVEC3 l_colider;
+    vtnVEC3 r_colider;
+
     ~vtnNODE() {
         for (int i = 0; i < child.size(); i++) {
             child[i]->~vtnNODE();
@@ -285,6 +288,20 @@ public:
         
         for (int i = this->mesh.vstart; i <= this->mesh.vend; i++) {
             (this->mesh.scene)->vert_buffer.v[i] = (*(this->mesh.scene)).vert_buffer.v[i] + mov;
+        }
+    }
+
+    void update_colider() {
+        l_colider = mesh.scene->vert_buffer.v[mesh.vstart];
+        r_colider = mesh.scene->vert_buffer.v[mesh.vstart];
+        for (int i = mesh.vstart; i <= mesh.vend; i++) {
+            l_colider.x = std::min(l_colider.x, mesh.scene->vert_buffer.v[i].x);
+            l_colider.y = std::min(l_colider.y, mesh.scene->vert_buffer.v[i].y);
+            l_colider.z = std::min(l_colider.z, mesh.scene->vert_buffer.v[i].z);
+            
+            r_colider.x = std::max(r_colider.x, mesh.scene->vert_buffer.v[i].x);
+            r_colider.y = std::max(r_colider.y, mesh.scene->vert_buffer.v[i].y);
+            r_colider.z = std::max(r_colider.z, mesh.scene->vert_buffer.v[i].z);
         }
     }
 

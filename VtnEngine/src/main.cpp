@@ -42,7 +42,7 @@ void Display() {
     vtnUpadateCameraPos(main_camera, main_camera.pos + vtnVEC3(0, 0, 1 * vtn_delta_time));
 
     for (int i = 0; i < main_scene.vert_buffer.len; i++)
-        main_scene.vert_buffer.v[i] = rotate_y(vtnVEC3(), 0.001, main_scene.vert_buffer.v[i]);
+        main_scene.vert_buffer.v[i] = rotate_y(vtnVEC3(), 1.5 * vtn_delta_time, main_scene.vert_buffer.v[i]);
 
     vtnRenderScene(main_scene);
 }
