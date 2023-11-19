@@ -140,7 +140,7 @@ void vtnRenderScene(vtnSCENE &scene) {
                     vtnDrawTriangle(p1, p2, p3, tris[i].color * light_dp);
             }
         }
-    }
+    } 
 }
 
 void vtnInitRenderer(vtnCAMERA &camera, vtnVEC2 view_port) {

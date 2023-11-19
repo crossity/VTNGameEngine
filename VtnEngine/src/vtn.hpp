@@ -9,7 +9,7 @@
 #include "vtn_draw.hpp"
 #include "vtn_timer.hpp"
 #include "vtn_scripter.hpp"
-#include "vtn_coliders.hpp"
+#include "vtn_colliders.hpp"
 
 void vtnQuit() {
     vtnQuitWindow();

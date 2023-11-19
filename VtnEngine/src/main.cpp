@@ -39,10 +39,15 @@ void Display() {
     SDL_SetRenderDrawColor(vtn_renderer, VTN_COLOR_UWU, 0);
     SDL_RenderClear(vtn_renderer);
 
-    vtnUpadateCameraPos(main_camera, main_camera.pos + vtnVEC3(0, 0, 1 * vtn_delta_time));
+    main_origin.child[0]->pos.x = sin(vtn_sync_time * 10) * 4;
+    main_origin.update_mesh();
+    main_origin.child[0]->update_collider();
+    //main_origin.child[1]->update_colider();
 
-    for (int i = 0; i < main_scene.vert_buffer.len; i++)
-        main_scene.vert_buffer.v[i] = rotate_y(vtnVEC3(), 1.5 * vtn_delta_time, main_scene.vert_buffer.v[i]);
+    if (is_collide(main_origin.child[0], main_origin.child[1]))
+        cout << "COLLISION" << endl;
+    else
+        cout << "DOT NOT COLLIDE" << endl;
 
     vtnRenderScene(main_scene);
 }
@@ -59,6 +64,8 @@ int main(int argc, char** argv) {
     vtnLoadToScene(main_scene, main_origin, "scripts/main.script");
 
     main_origin.update_mesh();
+    main_origin.child[0]->update_collider();
+    main_origin.child[1]->update_collider();
 
     main_origin.print();
 

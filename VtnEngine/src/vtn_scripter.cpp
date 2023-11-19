@@ -8,8 +8,10 @@
 #include "vtn_types.hpp"
 #include "vtn_draw.hpp"
 
-std::vector<vtnMESH> meshes;
-std::vector<vtnTEXTURE *> textures;
+vtnMESH meshes[1000];
+int meshes_size = 0;
+vtnTEXTURE *textures[1000];
+int textures_size = 0;
 
 bool IsSpace( char c )
 {
@@ -19,13 +21,13 @@ bool IsSpace( char c )
 std::vector<std::string> vtnGetWords( std::string FilePath )
 {
     static const char SingleChars[] = {
-        '`', '.', ';', ':',
-        '+', '-', '*', '/',
+        '`', ';', ':',
+        '*', '/',
         '&', '%', '#', '~',
         '<', '>', '=', '|',
         '{', '}', '(', ')'
     };
-    static const int SingleCharsSize = 20;
+    static const int SingleCharsSize = 17;
     std::ifstream file{FilePath};
     if (!file.is_open())
         throw std::runtime_error("failed to open file \"" + FilePath + "\"");
@@ -114,7 +116,7 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
                 
                 if (path == "")
                     throw(std::runtime_error("no such mesh '" + args[0] + "'"));
-                meshes.push_back(vtnMESH(&scene, path, textured));
+                meshes[meshes_size++] = vtnMESH(&scene, path, textured);
 
                 if (args.size() >= 3 && textured) {
                     std::string texture_path = "";
@@ -124,10 +126,10 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
                             break;
                         }
                     }
-                    textures.push_back(nullptr);
-                    vtnLoadFromPNG(&textures[textures.size() - 1], texture_path);
+                    textures[textures_size++] = nullptr;
+                    vtnLoadFromPNG(&textures[textures_size - 1], texture_path);
 
-                    meshes[meshes.size() - 1].texturize(&textures[textures.size() - 1]);
+                    meshes[meshes_size - 1].texturize(&textures[textures_size - 1]);
                 }
 
                 vtnVEC3 pos = vtnVEC3();
@@ -137,17 +139,17 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
 
                 if (args.size() >= 8 + textured) {
                     vtnVEC3 color = vtnVEC3(atof(args[5 + textured].c_str()), atof(args[6 + textured].c_str()), atof(args[7 + textured].c_str()));
-                    meshes[meshes.size() - 1].colorize(color);
+                    meshes[meshes_size - 1].colorize(color);
                 }
 
-                for (int i = meshes[meshes.size() - 1].vstart; i <= meshes[meshes.size() - 1].vend; i++)
+                for (int i = meshes[meshes_size - 1].vstart; i <= meshes[meshes_size - 1].vend; i++)
                     scene.vert_buffer.v[i] = scene.vert_buffer.v[i] + pos;
 
                 if (node == nullptr) {
-                    origin.child[origin.child.size() - 1]->mesh = meshes[meshes.size() - 1];
+                    origin.child[origin.child.size() - 1]->mesh = meshes[meshes_size - 1];
                 }
                 else {
-                    node->child[node->child.size() - 1]->mesh = meshes[meshes.size() - 1];
+                    node->child[node->child.size() - 1]->mesh = meshes[meshes_size - 1];
                 }
             }
             else if (words[start - 1] == "pos") {
@@ -159,6 +161,7 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
                 if (args.size() < 1)
                     throw(std::runtime_error("not enough arguments for mesh"));
 
+                vtnVEC3 pos = vtnVEC3(atof(args[0].c_str()), atof(args[1].c_str()), atof(args[2].c_str()));
                 if (node == nullptr)
                     origin.child[origin.child.size() - 1]->pos = vtnVEC3(atof(args[0].c_str()), atof(args[1].c_str()), atof(args[2].c_str()));
                 else
@@ -222,7 +225,7 @@ void vtnLoadToScene(vtnSCENE &scene, vtnORIGIN &origin, std::string file_path) {
                 w++;
                 while (w < words.size() && words[w] != ")")
                     args.push_back(words[w++]);
-                for (; ww >= 0 && words[ww] != args[0]; ww--);
+                for (; ww >= 0 && !(words[ww] == args[0] && words[ww + 1] == "{"); ww--);
                 vtnCompile(scene, origin, nullptr, words, ww);
             }
         }
@@ -230,6 +233,6 @@ void vtnLoadToScene(vtnSCENE &scene, vtnORIGIN &origin, std::string file_path) {
 }
 
 void vtnQuitScripter() {
-    for (int i = 0; i < textures.size(); i++)
+    for (int i = 0; i < textures_size; i++)
         SDL_DestroyTexture(textures[i]);
 }

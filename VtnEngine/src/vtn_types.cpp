@@ -91,5 +91,7 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
     this->vend = this->scene->vert_buffer.len - 1;
     this->tend = this->scene->tris.size() - 1;
 
+    f.close();
+
     return true;
 }
