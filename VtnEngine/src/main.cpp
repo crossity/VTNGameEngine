@@ -19,40 +19,20 @@ void Keyboard(uint8 key) {
     cout << key << endl;
 }
 
-vtnVEC3 rotate_y(vtnVEC3 c, float angle, vtnVEC3 p) {
-    float sn = sin(angle);
-    float cs = cos(angle);
-
-    p.z -= c.z;
-    p.x -= c.x;
-
-    float znew = p.z * cs - p.x * sn;
-    float xnew = p.z * sn + p.x * cs;
-
-    p.x = xnew + c.x;
-    p.z = znew + c.z;
-    return p;
-}
-
 void Display() {
     vtnTimer();
     SDL_SetRenderDrawColor(vtn_renderer, VTN_COLOR_UWU, 0);
     SDL_RenderClear(vtn_renderer);
 
-    main_origin.child[0]->pos.x = sin(vtn_sync_time * 10) * 4;
+    // vtnRotate(vtnROTATION(vtnVEC3(), vtnVEC3(0, 3.14 * 0.5 * vtn_delta_time, 0)), main_scene.vert_buffer.v + main_origin.child[0]->mesh.vstart, main_origin.child[0]->mesh.vend - main_origin.child[0]->mesh.vstart + 1);
+    // main_origin.child[0]->rot = main_origin.child[0]->rot + vtnVEC3(0, 3.14 * 0.5 * vtn_delta_time, 0);
     main_origin.update_mesh();
-    main_origin.child[0]->update_collider();
-    //main_origin.child[1]->update_colider();
-
-    if (is_collide(main_origin.child[0], main_origin.child[1]))
-        cout << "COLLISION" << endl;
-    else
-        cout << "DOT NOT COLLIDE" << endl;
+    //vtnUpadateCameraRot(main_camera, main_camera.rot + vtnVEC3(0, 3.14 * 0.2 * vtn_delta_time, 0));
 
     vtnRenderScene(main_scene);
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     vtnInitWindow("hello", Width, Height);
     vtnInitRenderer(main_camera, vtnVEC2(Width, Height));
     vtnInitDraw();
@@ -64,8 +44,6 @@ int main(int argc, char** argv) {
     vtnLoadToScene(main_scene, main_origin, "scripts/main.script");
 
     main_origin.update_mesh();
-    main_origin.child[0]->update_collider();
-    main_origin.child[1]->update_collider();
 
     main_origin.print();
 

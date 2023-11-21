@@ -143,6 +143,19 @@ struct vtnVEC3
     vtnVEC3 operator/(float a);
 };
 
+struct vtnROTATION {
+    vtnVEC3 center, angle;
+
+    vtnROTATION() {
+        this->center = vtnVEC3();
+        this->angle = vtnVEC3();
+    }
+    vtnROTATION(vtnVEC3 center, vtnVEC3 angle) {
+        this->center = center;
+        this->angle = angle;
+    }
+};
+
 struct vtnVEC4
 {
     float x, y, z, w;
@@ -294,10 +307,10 @@ struct vtnMESH
 struct vtnNODE
 {
 public:
-    vtnVEC3 glob_pos = vtnVEC3();
+    vtnVEC3 glob_pos = vtnVEC3(), glob_rot = vtnVEC3();
 
 public:
-    vtnVEC3 pos = vtnVEC3();
+    vtnVEC3 pos = vtnVEC3(), rot = vtnVEC3();
 
     std::vector<vtnNODE *> child;
     vtnMESH mesh;
@@ -321,20 +334,7 @@ public:
         child.push_back(ptr);
     }
 
-    void update_mesh(vtnVEC3 p_glob_pos)
-    {
-        vtnVEC3 new_glob_pos = p_glob_pos + this->pos;
-        vtnVEC3 mov = new_glob_pos - this->glob_pos;
-        this->glob_pos = new_glob_pos;
-
-        for (int i = 0; i < child.size(); i++)
-            (this->child[i])->update_mesh(this->glob_pos);
-
-        for (int i = this->mesh.vstart; i <= this->mesh.vend; i++)
-        {
-            (this->mesh.scene)->vert_buffer.v[i] = (*(this->mesh.scene)).vert_buffer.v[i] + mov;
-        }
-    }
+    void update_mesh(vtnVEC3 p_glob_pos, std::vector<vtnROTATION> rots);
 
     void update_collider()
     {
@@ -376,7 +376,7 @@ struct vtnORIGIN
     void update_mesh()
     {
         for (int i = 0; i < child.size(); i++)
-            (this->child[i])->update_mesh(vtnVEC3());
+            (this->child[i])->update_mesh(vtnVEC3(), {});
     }
 
     void print()

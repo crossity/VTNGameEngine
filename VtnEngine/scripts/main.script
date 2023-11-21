@@ -1,17 +1,26 @@
-$define model_path "models/box.obj"
 
-m = model_path
-t = "textures/block.png"
+$define texture_path "textures/block.png"
 
-cube {
-    mesh(m, TEXTURED, t, [0, 0, 0], [255, 255, 255])
-    pos(0, 0, 0.1)
+t = texture_path
+
+cube_m = "models/box.obj"
+sphere_m = "models/sphere.obj"
+
+planet {
+    mesh(sphere_m, UNTEXTURED, [0, 0, 0], [0, 0, 0], [10, 10, 200])
+    pos(3, 0, 0)
 }
 
-cube2 {
-    mesh(m, TEXTURED, t, [0, 0, 0], [255, 0, 0])
-    pos(0, 0, -0.1)
+sphere {
+    mesh(sphere_m, UNTEXTURED, [0, 0, 0], [0, 0, 0], [200, 10, 200])
+    pos(3, 0, 0)
+    add(planet)
+}
+
+cube {
+    mesh(cube_m, TEXTURED, t, [0, 0, 0], [0, 0, 0], [10, 200, 120])
+    pos(0, 0, 0)
+    add(sphere)
 }
 
 place(cube)
-place(cube2)

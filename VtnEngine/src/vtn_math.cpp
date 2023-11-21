@@ -211,3 +211,37 @@ void vtnTriangleClip(vtnVEC3 plane_p, vtnVEC3 plane_n, std::vector<vtnVEC3> &tri
         uv_queue.erase(uv_queue.begin(), uv_queue.begin() + 3);
     }
 }
+
+void vtnRotate(vtnROTATION rot, vtnVEC3 *points, int n) {
+    float csx = cos(rot.angle.x), snx = sin(rot.angle.x);
+    float csy = cos(rot.angle.y), sny = sin(rot.angle.y);
+    float csz = cos(rot.angle.z), snz = sin(rot.angle.z);
+
+    vtnMAT3X3 rm{};
+    rm.v[0][0] = csz;
+    rm.v[0][1] = -snz;
+    rm.v[1][0] = snz;
+    rm.v[1][1] = csz;
+    rm.v[2][2] = 1;
+
+    vtnMAT3X3 m{};
+    m.v[0][0] = csy;
+    m.v[0][2] = sny;
+    m.v[1][1] = 1;
+    m.v[2][0] = -sny;
+    m.v[2][2] = csy;
+
+    rm = rm * m;
+
+    m = vtnMAT3X3();
+    m.v[0][0] = 1;
+    m.v[1][1] = csx;
+    m.v[1][2] = -snx;
+    m.v[2][1] = snx;
+    m.v[2][2] = csx;
+
+    rm = rm * m;
+
+    for (int i = 0; i < n; i++)
+        points[i] = rm * (points[i] - rot.center) + rot.center;
+}

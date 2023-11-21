@@ -1,0 +1,23 @@
+preinterpritational functions:
+    $define new_definition word_to_replace
+
+loading files:
+    mesh_name = "mesh_path"
+    texture_name = "texture_path"
+
+creating node:
+    node_name {
+        ...
+    }
+
+    functions in node definition:
+        mesh(mesh_name, TEXTURED/UNTEXTURED/0/1, 
+             if textured then texture_name, pos_x, pos_y, pos_z, 
+             rot_x, rot_y, rot_z, color_r, color_g, color_b
+            ) // configures loaded mesh
+        pos(pos.x, pos.y, pos.z) // changes local node position
+        rot(rot.x, rot.y, rot.z) // changes local node rotation
+        add(node_name) // adding a node as a child
+
+scene creation:
+    place(node_name) // places a node to the origin

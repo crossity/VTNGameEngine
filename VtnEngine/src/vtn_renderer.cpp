@@ -94,11 +94,11 @@ void vtnRenderScene(vtnSCENE &scene) {
     std::vector<vtnTRI> tris(scene.tris.size());
     memcpy(tris.data(), scene.tris.data(), sizeof(vtnTRI) * scene.tris.size());
     std::sort(tris.begin(), tris.end(), [&](vtnTRI a, vtnTRI b) {
-        vtnVEC3 ca = scene.vert_buffer.v[a.p[0]] + scene.vert_buffer.v[a.p[1]] + scene.vert_buffer.v[a.p[2]];
-        vtnVEC3 cb = scene.vert_buffer.v[b.p[0]] + scene.vert_buffer.v[b.p[1]] + scene.vert_buffer.v[b.p[2]];
+        vtnVEC3 ca = (scene.vert_buffer.v[a.p[0]] + scene.vert_buffer.v[a.p[1]] + scene.vert_buffer.v[a.p[2]]) * 0.3333;
+        vtnVEC3 cb = (scene.vert_buffer.v[b.p[0]] + scene.vert_buffer.v[b.p[1]] + scene.vert_buffer.v[b.p[2]]) * 0.3333;
         float da = vtnDist2(vtn_camera_pos, ca);
         float db = vtnDist2(vtn_camera_pos, cb);
-        return db < da;
+        return da > db;
     });
 
     for (int i = 0; i < tris.size(); i++) {

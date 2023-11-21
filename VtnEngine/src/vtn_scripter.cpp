@@ -7,6 +7,7 @@
 #include "vtn_scripter.hpp"
 #include "vtn_types.hpp"
 #include "vtn_draw.hpp"
+#include "vtn_math.hpp"
 
 vtnMESH meshes[1000];
 int meshes_size = 0;
@@ -137,13 +138,19 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
                     pos = vtnVEC3(atof(args[2 + textured].c_str()), atof(args[3 + textured].c_str()), atof(args[4 + textured].c_str()));
                 }
 
+                vtnVEC3 rot = vtnVEC3();
                 if (args.size() >= 8 + textured) {
-                    vtnVEC3 color = vtnVEC3(atof(args[5 + textured].c_str()), atof(args[6 + textured].c_str()), atof(args[7 + textured].c_str()));
+                    rot = vtnVEC3(atof(args[5 + textured].c_str()), atof(args[6 + textured].c_str()), atof(args[7 + textured].c_str()));
+                }
+
+                if (args.size() >= 11 + textured) {
+                    vtnVEC3 color = vtnVEC3(atof(args[8 + textured].c_str()), atof(args[9 + textured].c_str()), atof(args[10 + textured].c_str()));
                     meshes[meshes_size - 1].colorize(color);
                 }
 
                 for (int i = meshes[meshes_size - 1].vstart; i <= meshes[meshes_size - 1].vend; i++)
                     scene.vert_buffer.v[i] = scene.vert_buffer.v[i] + pos;
+                vtnRotate(vtnROTATION(vtnVEC3(), rot), scene.vert_buffer.v + meshes[meshes_size - 1].vstart, meshes[meshes_size - 1].vend - meshes[meshes_size - 1].vstart + 1);
 
                 if (node == nullptr) {
                     origin.child[origin.child.size() - 1]->mesh = meshes[meshes_size - 1];
@@ -163,9 +170,24 @@ void vtnCompile(vtnSCENE &scene, vtnORIGIN &origin, vtnNODE *node, std::vector<s
 
                 vtnVEC3 pos = vtnVEC3(atof(args[0].c_str()), atof(args[1].c_str()), atof(args[2].c_str()));
                 if (node == nullptr)
-                    origin.child[origin.child.size() - 1]->pos = vtnVEC3(atof(args[0].c_str()), atof(args[1].c_str()), atof(args[2].c_str()));
+                    origin.child[origin.child.size() - 1]->pos = pos;
                 else
-                    node->child[node->child.size() - 1]->pos = vtnVEC3(atof(args[0].c_str()), atof(args[1].c_str()), atof(args[2].c_str()));
+                    node->child[node->child.size() - 1]->pos = pos;
+            }
+            else if (words[start - 1] == "rot") {
+                std::vector<std::string> args;
+                start++;
+                while (start < words.size() && words[start] != ")")
+                    args.push_back(words[start++]);
+                
+                if (args.size() < 1)
+                    throw(std::runtime_error("not enough arguments for mesh"));
+
+                vtnVEC3 rot = vtnVEC3(atof(args[0].c_str()), atof(args[1].c_str()), atof(args[2].c_str()));
+                if (node == nullptr)
+                    origin.child[origin.child.size() - 1]->rot = rot;
+                else
+                    node->child[node->child.size() - 1]->rot = rot;
             }
             else if (words[start - 1] == "add") {
                 std::vector<std::string> args;

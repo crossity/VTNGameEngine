@@ -24,3 +24,5 @@ vtnMAT3X3 vtnTranspose(vtnMAT3X3 a);
 
 vtnVEC3 vtnLineIntersectPlane(vtnVEC3 plane_p, vtnVEC3 plane_n, vtnVEC3 line_start, vtnVEC3 line_end, float *t);
 void vtnTriangleClip(vtnVEC3 plane_p, vtnVEC3 plane_n, std::vector<vtnVEC3> &tri_queue, std::vector<vtnVEC2> &uv_queue);
+
+void vtnRotate(vtnROTATION rot, vtnVEC3 *points, int n);

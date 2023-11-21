@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "vtn_types.hpp"
+#include "vtn_math.hpp"
 
 vtnVEC2 vtnVEC2::operator/(float a) {
     if (a == 0)
@@ -94,4 +95,30 @@ bool vtnMESH::LoadFromObjectFile(std::string sFilename, bool Textured) {
     f.close();
 
     return true;
+}
+
+void vtnNODE::update_mesh(vtnVEC3 p_glob_pos, std::vector<vtnROTATION> rots)
+{
+    vtnVEC3 new_glob_pos = p_glob_pos + this->pos;
+
+    rots.push_back(vtnROTATION(this->glob_pos, this->rot));
+    for (int i = 0; i < child.size(); i++)
+        (this->child[i])->update_mesh(new_glob_pos, rots);
+
+    vtnVEC3 new_glob_rot = this->rot;
+    for (int i = rots.size() - 2; i >= 0; i--) {
+        vtnRotate(rots[i], &new_glob_pos, 1);
+        new_glob_rot = new_glob_rot + rots[i].angle;
+    }
+
+    vtnVEC3 mov = new_glob_pos - this->glob_pos;
+    vtnVEC3 drot = new_glob_rot - this->glob_rot;
+    this->glob_pos = new_glob_pos;
+    this->glob_rot = new_glob_rot;
+
+    for (int i = this->mesh.vstart; i <= this->mesh.vend; i++)
+    {
+        (this->mesh.scene)->vert_buffer.v[i] = (*(this->mesh.scene)).vert_buffer.v[i] + mov;
+    }
+    vtnRotate(vtnROTATION(new_glob_pos, drot),  (this->mesh.scene)->vert_buffer.v + this->mesh.vstart, this->mesh.vend - this->mesh.vstart + 1);
 }
