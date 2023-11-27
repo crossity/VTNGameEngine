@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     vtnInitKeyboardFunc(Keyboard);
     vtnInitDisplayFunc(Display);
 
-    main_scene.lights.push_back(vtnVecNorm(vtnVEC3(1, -1, -1)));
+    main_scene.dir_lights.push_back(vtnVecNorm(vtnVEC3(1, -1, -1)));
 
     vtnLoadToScene(main_scene, main_origin, "scripts/main.script");
 
