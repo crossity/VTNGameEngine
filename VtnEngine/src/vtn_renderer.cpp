@@ -13,8 +13,9 @@
 vtnMAT3X3 vtn_to_camera_mat;
 vtnMAT4X4 vtn_projection_mat;
 vtnVEC2 vtn_view_port;
-vtnVEC3 vtn_camera_pos;
+vtnVEC3 vtn_camera_pos, vtn_camera_rot;
 float vtn_near_plane;
+float vtn_dir_sort_k;
 
 /*
 public static Matrix3D PrespectiveFromHV(double fieldOfViewY, double aspectRatio, double zNearPlane, double zFarPlane, double mod)
@@ -39,6 +40,7 @@ void vtnUpadateCameraRot(vtnCAMERA &camera, vtnVEC3 rot) {
     float snx = sin(rot.x), sny = sin(rot.y), snz = sin(rot.z);
 
     camera.rot = rot;
+    vtn_camera_rot = rot;
 
     vtn_to_camera_mat = vtnMAT3X3(0);
     vtn_to_camera_mat.v[0][0] = 1;
@@ -54,6 +56,7 @@ void vtnUpadateCameraRot(vtnCAMERA &camera, vtnVEC3 rot) {
     m.v[2][2] = csy;
 
     vtn_to_camera_mat = vtn_to_camera_mat * m;
+    m = vtnMAT3X3(0);
 
     m.v[0][0] = csz;
     m.v[0][1] = snz;
@@ -98,7 +101,13 @@ void vtnRenderScene(vtnSCENE &scene) {
         vtnVEC3 cb = (scene.vert_buffer.v[b.p[0]] + scene.vert_buffer.v[b.p[1]] + scene.vert_buffer.v[b.p[2]]) * 0.3333;
         float da = vtnDist2(vtn_camera_pos, ca);
         float db = vtnDist2(vtn_camera_pos, cb);
-        return da > db;
+        vtnVEC3 aline1 = (scene.vert_buffer).v[a.p[1]] - (scene.vert_buffer).v[a.p[0]];
+        vtnVEC3 aline2 = (scene.vert_buffer).v[a.p[2]] - (scene.vert_buffer).v[a.p[0]];
+        vtnVEC3 an = vtnVecNorm(vtnCrossProduct(aline1, aline2));
+        vtnVEC3 bline1 = (scene.vert_buffer).v[b.p[1]] - (scene.vert_buffer).v[b.p[0]];
+        vtnVEC3 bline2 = (scene.vert_buffer).v[b.p[2]] - (scene.vert_buffer).v[b.p[0]];
+        vtnVEC3 bn = vtnVecNorm(vtnCrossProduct(bline1, bline2));
+        return da + vtnDotProduct(an, vtnVEC3(sin(vtn_camera_rot.y), 0, cos(vtn_camera_rot.y))) * vtn_dir_sort_k > db + vtnDotProduct(bn, vtnVEC3(sin(vtn_camera_rot.y), 0, cos(vtn_camera_rot.y))) * vtn_dir_sort_k;
     });
 
     for (int i = 0; i < tris.size(); i++) {
@@ -112,6 +121,7 @@ void vtnRenderScene(vtnSCENE &scene) {
             vtnVEC3 t_p1 = vtn_to_camera_mat * ((scene.vert_buffer).v[tris[i].p[0]] - vtn_camera_pos);
             vtnVEC3 t_p2 = vtn_to_camera_mat * ((scene.vert_buffer).v[tris[i].p[1]] - vtn_camera_pos);
             vtnVEC3 t_p3 = vtn_to_camera_mat * ((scene.vert_buffer).v[tris[i].p[2]] - vtn_camera_pos);
+            vtnVEC3 t_c = ((scene.vert_buffer).v[tris[i].p[0]] + (scene.vert_buffer).v[tris[i].p[1]] + (scene.vert_buffer).v[tris[i].p[2]]) / 3.f;
 
             std::vector<vtnVEC3> tri_queue;
             tri_queue.push_back(t_p1);
@@ -126,8 +136,10 @@ void vtnRenderScene(vtnSCENE &scene) {
 
             float light_dp = 0;
 
-            for (int j = 0; j < scene.lights.size(); j++)
-                light_dp += std::fmax(vtnDotProduct(scene.lights[j], n), 0.f);
+            for (int j = 0; j < scene.dir_lights.size(); j++)
+                light_dp += std::fmax(vtnDotProduct(scene.dir_lights[j], n), 0.1f);
+            for (int j = 0; j < scene.point_lights.size(); j++)
+                light_dp += std::fmax(vtnDotProduct(vtnVecNorm(scene.point_lights[j] - t_c), n), 0.1f);
             light_dp = std::fmin(light_dp, 1.f);
 
             for (int j = 0; j < tri_queue.size(); j += 3) {
@@ -143,11 +155,13 @@ void vtnRenderScene(vtnSCENE &scene) {
     } 
 }
 
-void vtnInitRenderer(vtnCAMERA &camera, vtnVEC2 view_port) {
+void vtnInitRenderer(vtnCAMERA &camera, vtnVEC2 view_port, float dir_sort_k = 1) {
     vtnUpadateCameraRot(camera, camera.rot);
+    vtnUpadateCameraPos(camera, camera.pos);
     vtn_view_port = view_port;
-    vtn_camera_pos = camera.pos;
     vtn_near_plane = camera.z_near;
+
+    vtn_dir_sort_k = dir_sort_k;
 
     vtn_projection_mat = vtnMAT4X4(0);
     vtn_projection_mat.v[0][0] = (view_port.y / view_port.x) * (1 / tan(camera.fov * 0.5));

@@ -3,5 +3,6 @@
 #include "vtn_types.hpp"
 
 void vtnUpdate(bool &run);
-void vtnInitKeyboardFunc(void (*func)(uint8));
+void vtnInitKeyboardDownFunc(void (*func)(uint8));
+void vtnInitKeyboardUpFunc(void (*func)(uint8));
 void vtnInitDisplayFunc(void (*func)());

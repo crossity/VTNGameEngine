@@ -5,14 +5,21 @@
 #include "vtn_window.hpp"
 #include "vtn_defines.hpp"
 
-void (*vtnKeyboard)(uint8);
-bool vtnKeyboardDefined = false;
+void (*vtnKeyboardDown)(uint8);
+bool vtnKeyboardDownDefined = false;
+void (*vtnKeyboardUp)(uint8);
+bool vtnKeyboardUpDefined = false;
 void (*vtnDisplay)();
 bool vtnDisplayDefined = false;
 
-void vtnInitKeyboardFunc(void (*func)(uint8)) {
-    vtnKeyboardDefined = true;
-    vtnKeyboard = func;
+void vtnInitKeyboardDownFunc(void (*func)(uint8)) {
+    vtnKeyboardDownDefined = true;
+    vtnKeyboardDown = func;
+}
+
+void vtnInitKeyboardUpFunc(void (*func)(uint8)) {
+    vtnKeyboardUpDefined = true;
+    vtnKeyboardUp = func;
 }
 
 void vtnInitDisplayFunc(void (*func)()) {
@@ -29,8 +36,12 @@ void vtnUpdate(bool &run) {
                 run = false;
                 break;
             case SDL_KEYDOWN:
-                if (vtnKeyboardDefined)
-                    vtnKeyboard(event.key.keysym.sym);
+                if (vtnKeyboardDownDefined)
+                    vtnKeyboardDown(event.key.keysym.sym);
+                break;
+            case SDL_KEYUP:
+                if (vtnKeyboardUpDefined)
+                    vtnKeyboardUp(event.key.keysym.sym);
                 break;
             default:
                 break;

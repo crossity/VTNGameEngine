@@ -6,7 +6,7 @@
 
 #include <SDL2/SDL_image.h>
 
-#define VTN_VBUFFER_SIZE 1000
+#define VTN_VBUFFER_SIZE 10000
 
 typedef char int8;
 typedef unsigned char uint8;
@@ -267,7 +267,8 @@ struct vtnSCENE
 {
     vtnVBUFFER vert_buffer;
     std::vector<vtnTRI> tris;
-    std::vector<vtnVEC3> lights;
+    std::vector<vtnVEC3> dir_lights;
+    std::vector<vtnVEC3> point_lights;
 };
 
 struct vtnMESH
